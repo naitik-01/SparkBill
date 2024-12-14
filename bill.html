@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Details</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Background Video */
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+        }
+
+        .blink {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 600px;
+            margin: 100px auto 80px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .bill-details {
+            margin-top: 20px;
+        }
+
+        .bill-details p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Video -->
+    <video class="background-video" autoplay muted loop>
+        <source src="videoplayback.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Header -->
+    <header>
+        <h1 class="blink">SparkBill</h1>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Bill Details</h1>
+        <div class="bill-details" id="billDetails"></div>
+        <a href="index.html" class="btn">Go Back</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 SparkBill</p>
+        <div class="social-icons">
+            <a href="mailto: naitikkumarmeps@gmail.com">📧</a>
+            <a href="tel: 8979133549">📞</a>
+            <a href="https://www.linkedin.com/in/naitikkumar/">🔗</a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const billData = JSON.parse(localStorage.getItem('billData'));
+            if (!billData) {
+                document.getElementById('billDetails').innerHTML = '<p>No bill data available.</p>';
+                return;
+            }
+
+            const { name, accountNumber, units, totalCost, date } = billData;
+            document.getElementById('billDetails').innerHTML = `
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Account Number:</strong> ${accountNumber}</p>
+                <p><strong>Units Consumed:</strong> ${units}</p>
+                <p><strong>Total Amount:</strong> ₹${totalCost.toFixed(2)}</p>
+                <p><strong>Date:</strong> ${date}</p>
+            `;
+        });
+    </script>
+</body>
+</html>

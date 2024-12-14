@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Bill</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .bill-details {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .bill-details p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Bill</h1>
+        <div id="billDetails" class="bill-details">
+            <!-- Bill details will be displayed here -->
+        </div>
+        <a href="index.html" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+        // Retrieve the latest bill data from localStorage
+        function getLiveBill() {
+            const allBills = JSON.parse(localStorage.getItem('allBills')) || [];
+            if (allBills.length === 0) {
+                return null;
+            }
+            // Return the most recent bill (last added)
+            return allBills[allBills.length - 1];
+        }
+
+        // Display the live bill details
+        function displayLiveBill() {
+            const bill = getLiveBill();
+            const billDetailsContainer = document.getElementById('billDetails');
+
+            if (bill) {
+                billDetailsContainer.innerHTML = `
+                    <p><strong>Name:</strong> ${bill.name}</p>
+                    <p><strong>Account Number:</strong> ${bill.accountNumber}</p>
+                    <p><strong>Units Consumed:</strong> ${bill.units}</p>
+                    <p><strong>Total Cost:</strong> $${bill.totalCost}</p>
+                    <p><strong>Date:</strong> ${bill.date}</p>
+                `;
+            } else {
+                billDetailsContainer.innerHTML = '<p>No live bill available.</p>';
+            }
+        }
+
+        // Initialize the page
+        displayLiveBill();
+    </script>
+</body>
+</html>

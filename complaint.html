@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Form</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Background Video */
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+        }
+
+        .blink {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 600px;
+            margin: 100px auto 80px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .success-message {
+            color: green;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Video -->
+    <video class="background-video" autoplay muted loop>
+        <source src="videoplayback.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Header -->
+    <header>
+        <h1 class="blink">SparkBill</h1>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Complaint Form</h1>
+        <form id="complaintForm">
+            <label for="name">Your Name:</label>
+            <input type="text" id="name" placeholder="Enter your name" required>
+
+            <label for="accountNumber">Account Number:</label>
+            <input type="number" id="accountNumber" placeholder="Enter account number" required>
+
+            <label for="complaint">Complaint:</label>
+            <textarea id="complaint" placeholder="Describe your complaint" required></textarea>
+
+            <button type="submit">Submit Complaint</button>
+        </form>
+
+        <div class="success-message" id="successMessage" style="display: none;">
+            Complaint submitted successfully!
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 SparkBill</p>
+        <div class="social-icons">
+            <a href="mailto: naitikkumarmeps@gmail.com">📧</a>
+            <a href="tel: 8979133549">📞</a>
+            <a href="https://www.linkedin.com/in/naitikkumar/">🔗</a>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('complaintForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const complaint = document.getElementById('complaint').value;
+
+            // Store complaint data in localStorage
+            const complaintData = {
+                name,
+                accountNumber,
+                complaint,
+                date: new Date().toLocaleString(),
+            };
+
+            const complaintHistory = JSON.parse(localStorage.getItem('complaintHistory')) || [];
+            complaintHistory.push(complaintData);
+            localStorage.setItem('complaintHistory', JSON.stringify(complaintHistory));
+
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('complaintForm').reset();
+        });
+    </script>
+</body>
+</html>

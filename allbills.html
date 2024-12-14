@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Bills</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .bill {
+            border: 1px solid #ddd;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+
+        .bill p {
+            margin: 5px 0;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Bills</h1>
+        <div id="liveBills">
+            <!-- Live bills will be dynamically displayed here -->
+        </div>
+        <a href="index.html" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const allBills = JSON.parse(localStorage.getItem('allBills')) || [];
+
+            // Filter to get the most recent bill for each account
+            const liveBillsMap = {};
+            allBills.forEach(bill => {
+                liveBillsMap[bill.accountNumber] = bill; // Replace with the most recent bill
+            });
+
+            const liveBills = Object.values(liveBillsMap);
+            const liveBillsContainer = document.getElementById('liveBills');
+
+            if (liveBills.length === 0) {
+                liveBillsContainer.innerHTML = '<p>No live bills available.</p>';
+                return;
+            }
+
+            liveBills.forEach(bill => {
+                const billElement = document.createElement('div');
+                billElement.classList.add('bill');
+                billElement.innerHTML = `
+                    <p><strong>Name:</strong> ${bill.name}</p>
+                    <p><strong>Account Number:</strong> ${bill.accountNumber}</p>
+                    <p><strong>Units Consumed:</strong> ${bill.units}</p>
+                    <p><strong>Total Amount:</strong> ₹${bill.totalCost.toFixed(2)}</p>
+                    <p><strong>Date:</strong> ${bill.date}</p>
+                `;
+                liveBillsContainer.appendChild(billElement);
+            });
+        });
+    </script>
+</body>
+</html>

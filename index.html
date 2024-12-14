@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SparkBill Home</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Background Video */
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+        }
+
+        .blink {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 600px;
+            margin: 100px auto 80px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .btn {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #007bff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .form-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .form-container input, .form-container button {
+            width: calc(100% - 20px);
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .form-container button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Video -->
+    <video class="background-video" autoplay muted loop>
+        <source src="videoplayback.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Header -->
+    <header>
+        <h1 class="blink">SparkBill</h1>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Welcome to SparkBill</h1>
+        <button class="btn" onclick="showForm()">Generate Bill</button>
+
+        <!-- Form Container -->
+        <div class="form-container" id="billForm">
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="accountNumber" placeholder="Account Number" required>
+            <input type="number" id="readingFrom" placeholder="Reading From" required>
+            <input type="number" id="readingTo" placeholder="Reading To" required>
+            <button onclick="generateBill()">Generate Bill</button>
+        </div>
+
+        <a href="history.html" class="btn">View All Bills</a>
+        <a href="live.html" class="btn">View Live Bill</a>
+        <a href="complaint.html" class="btn">Submit a Complaint</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 SparkBill</p>
+        <div class="social-icons">
+            <a href="mailto: naitikkumarmeps@gmail.com">📧</a>
+            <a href="tel: 8979133549">📞</a>
+            <a href="https://www.linkedin.com/in/naitikkumar/">🔗</a>
+        </div>
+    </footer>
+
+    <script>
+        function showForm() {
+            document.getElementById('billForm').style.display = 'block';
+        }
+
+        function generateBill() {
+            const name = document.getElementById('name').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const readingFrom = parseInt(document.getElementById('readingFrom').value);
+            const readingTo = parseInt(document.getElementById('readingTo').value);
+
+            if (!name || !accountNumber || isNaN(readingFrom) || isNaN(readingTo) || readingTo <= readingFrom) {
+                alert('Please fill out all fields correctly.');
+                return;
+            }
+
+            const units = readingTo - readingFrom;
+            const totalCost = units * 5; // Assuming a fixed rate per unit.
+
+            const billData = { name, accountNumber, units, totalCost, date: new Date().toLocaleDateString() };
+
+            // Retrieve old bills, add the new bill, and save to localStorage
+            let allBills = JSON.parse(localStorage.getItem('allBills')) || [];
+            allBills = allBills.filter(bill => bill.accountNumber !== accountNumber); // Remove old bills for this account
+            allBills.push(billData);
+            localStorage.setItem('allBills', JSON.stringify(allBills));
+
+            localStorage.setItem('billData', JSON.stringify(billData)); // Save the most recent bill
+            alert('Bill generated successfully!');
+            window.location.href = 'bill.html';
+        }
+    </script>
+</body>
+</html>
