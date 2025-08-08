@@ -46,6 +46,9 @@
             <button id="google-login-btn" class="w-full bg-white hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
                 <i class="fab fa-google"></i> Sign in with Google
             </button>
+            <button id="anonymous-login-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4">
+                Continue as Guest
+            </button>
             <p class="text-gray-300 mt-6">Don't have an account? <button id="show-signup-btn" class="font-semibold text-blue-300 hover:text-blue-200">Sign Up</button></p>
         </div>
     </template>
@@ -64,47 +67,45 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const authContainer = document.getElementById('auth-container');
         
         // --- 1. Firebase Configuration ---
-        // This is now hardcoded with your project details.
         const firebaseConfig = {
             apiKey: "AIzaSyDtp76ZBi1bgq6Kd5YmSLy6g6epz9akqbo",
             authDomain: "sparkbill-3acd9.firebaseapp.com",
             projectId: "sparkbill-3acd9",
             storageBucket: "sparkbill-3acd9.appspot.com",
             messagingSenderId: "229628431102",
-            appId: "1:229628431102:web:d7a8c9b0e1f2a3b4c5d6e7" // Example App ID
+            appId: "1:229628431102:web:d7a8c9b0e1f2a3b4c5d6e7"
         };
 
         // --- 2. Initialize Firebase and Set Up UI ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = "sparkbill-3acd9"; // Using your project ID
+        const appId = "sparkbill-3acd9";
 
         function showLoginForm() {
-            authContainer.innerHTML = ''; // Clear container
+            authContainer.innerHTML = '';
             const template = document.getElementById('login-template');
             const form = template.content.cloneNode(true);
             authContainer.appendChild(form);
             
-            // Re-attach event listeners
             document.getElementById('show-signup-btn').addEventListener('click', showSignupForm);
             document.getElementById('login-btn').addEventListener('click', handleLogin);
             document.getElementById('google-login-btn').addEventListener('click', handleGoogleLogin);
+            document.getElementById('anonymous-login-btn').addEventListener('click', handleAnonymousLogin);
         }
 
         function showSignupForm() {
-            authContainer.innerHTML = ''; // Clear container
+            authContainer.innerHTML = '';
             const template = document.getElementById('signup-template');
             const form = template.content.cloneNode(true);
             authContainer.appendChild(form);
 
-            // Re-attach event listeners
             document.getElementById('show-login-btn').addEventListener('click', showLoginForm);
             document.getElementById('signup-btn').addEventListener('click', handleSignup);
         }
@@ -123,7 +124,6 @@
                 const user = userCredential.user;
                 const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
                 await setDoc(userDocRef, { name: name, email: email });
-                // onAuthStateChanged will handle redirect
             } catch (error) {
                 alert(`Sign-up Error: ${error.message}`);
             }
@@ -138,7 +138,6 @@
             }
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged will handle redirect
             } catch (error) {
                 alert(`Login Error: ${error.message}`);
             }
@@ -150,21 +149,25 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
-                // Use { merge: true } to avoid overwriting existing data if user signs up differently
                 await setDoc(userDocRef, { name: user.displayName, email: user.email }, { merge: true });
-                // onAuthStateChanged will handle redirect
             } catch (error) {
                 alert(`Google Sign-In Error: ${error.message}`);
+            }
+        }
+
+        async function handleAnonymousLogin() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                alert(`Guest Login Error: ${error.message}`);
             }
         }
 
         // --- 4. Auth State Observer ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // If user is logged in, redirect to the dashboard
                 window.location.href = './dashboard.html';
             } else {
-                // If user is logged out, show the login form
                 showLoginForm();
             }
         });
