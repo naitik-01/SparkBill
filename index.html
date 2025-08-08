@@ -8,46 +8,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        #particles-js { position: fixed; width: 100%; height: 100%; background-color: #111827; z-index: -1; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden;
+            background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #1d4ed8, #2563eb);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white no-scrollbar">
-    <div id="particles-js"></div>
-
-    <main class="container mx-auto flex items-center justify-center min-h-screen px-4 py-8">
+<body class="text-white">
+    <main class="container mx-auto flex flex-col items-center justify-center min-h-screen px-4 py-8">
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold tracking-wider">SparkBill</h1>
+            <p class="text-blue-200">Your Personal Expense Tracker</p>
+        </div>
         <div id="auth-container" class="max-w-md w-full">
             <!-- Login Form -->
-            <div id="login-form" class="bg-white/10 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
-                <h1 class="text-4xl font-bold mb-2">Welcome Back!</h1>
-                <p class="text-gray-400 mb-8">Log in to manage your bills.</p>
-                <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div id="login-form" class="bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
+                <h2 class="text-3xl font-bold mb-6">Login</h2>
+                <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <button id="login-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Login</button>
                 <div class="my-4 flex items-center">
-                    <hr class="flex-grow border-gray-600"><span class="mx-2 text-gray-400">OR</span><hr class="flex-grow border-gray-600">
+                    <hr class="flex-grow border-blue-400/50"><span class="mx-2 text-gray-300 text-sm">OR</span><hr class="flex-grow border-blue-400/50">
                 </div>
                 <button id="google-login-btn" class="w-full bg-white hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
                     <i class="fab fa-google"></i> Sign in with Google
                 </button>
-                <p class="text-gray-400 mt-6">Don't have an account? <button id="show-signup-btn" class="font-semibold text-blue-400 hover:text-blue-300">Sign Up</button></p>
+                <p class="text-gray-300 mt-6">Don't have an account? <button id="show-signup-btn" class="font-semibold text-blue-300 hover:text-blue-200">Sign Up</button></p>
             </div>
             <!-- Signup Form -->
-            <div id="signup-form" class="hidden bg-white/10 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
-                <h1 class="text-4xl font-bold mb-2">Create Account</h1>
-                <p class="text-gray-400 mb-8">Start tracking your expenses with SparkBill.</p>
-                <input type="text" id="signup-name" placeholder="Full Name" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div id="signup-form" class="hidden bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
+                <h2 class="text-3xl font-bold mb-6">Create Account</h2>
+                <input type="text" id="signup-name" placeholder="Full Name" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <button id="signup-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Create Account</button>
-                <p class="text-gray-400 mt-6">Already have an account? <button id="show-login-btn" class="font-semibold text-blue-400 hover:text-blue-300">Login</button></p>
+                <p class="text-gray-300 mt-6">Already have an account? <button id="show-login-btn" class="font-semibold text-blue-300 hover:text-blue-200">Login</button></p>
             </div>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -65,7 +72,6 @@
             }
         });
 
-        // --- UI Toggling ---
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
         document.getElementById('show-signup-btn').addEventListener('click', () => {
@@ -77,7 +83,6 @@
             loginForm.classList.remove('hidden');
         });
 
-        // --- Email/Pass Signup ---
         document.getElementById('signup-btn').addEventListener('click', async () => {
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
@@ -96,7 +101,6 @@
             }
         });
 
-        // --- Email/Pass Login ---
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -111,7 +115,6 @@
             }
         });
 
-        // --- Google Login ---
         document.getElementById('google-login-btn').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
             try {
@@ -123,9 +126,6 @@
                 alert(`Error with Google Sign-In: ${error.message}`);
             }
         });
-
-        // --- Background Animation ---
-        particlesJS('particles-js', { particles: { number: { value: 60 }, color: { value: "#ffffff" }, shape: { type: "circle" }, opacity: { value: 0.5, random: true }, size: { value: 3, random: true }, line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4 }, move: { enable: true, speed: 2, direction: "none", out_mode: "out" } }, interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "repulse" } } } });
     </script>
 </body>
 </html>
