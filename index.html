@@ -3,202 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SparkBill Home</title>
+    <title>SparkBill - Welcome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* Background Video */
-        .background-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -1;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            z-index: 2;
-        }
-
-        .blink {
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        /* Footer */
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            z-index: 2;
-        }
-
-        .social-icons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 5px;
-        }
-
-        .social-icons a {
-            color: #fff;
-            font-size: 20px;
-            text-decoration: none;
-        }
-
-        /* Main Content */
-        .container {
-            max-width: 600px;
-            margin: 100px auto 80px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .btn {
-            display: block;
-            margin: 10px auto;
-            padding: 10px;
-            font-size: 18px;
-            color: #fff;
-            background-color: #007bff;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 4px;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        .form-container {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .form-container input, .form-container button {
-            width: calc(100% - 20px);
-            margin: 10px 0;
-            padding: 10px;
-            font-size: 16px;
-        }
-
-        .form-container button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .form-container button:hover {
-            background-color: #0056b3;
-        }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        #particles-js { position: fixed; width: 100%; height: 100%; background-color: #111827; z-index: -1; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
-    <!-- Background Video -->
-    <video class="background-video" autoplay muted loop>
-        <source src="videoplayback.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+<body class="bg-gray-900 text-white no-scrollbar">
+    <div id="particles-js"></div>
 
-    <!-- Header -->
-    <header>
-        <h1 class="blink">SparkBill</h1>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container">
-        <h1>Welcome to SparkBill</h1>
-        <button class="btn" onclick="showForm()">Generate Bill</button>
-
-        <!-- Form Container -->
-        <div class="form-container" id="billForm">
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="accountNumber" placeholder="Account Number" required>
-            <input type="number" id="readingFrom" placeholder="Reading From" required>
-            <input type="number" id="readingTo" placeholder="Reading To" required>
-            <button onclick="generateBill()">Generate Bill</button>
+    <main class="container mx-auto flex items-center justify-center min-h-screen px-4 py-8">
+        <div id="auth-container" class="max-w-md w-full">
+            <!-- Login Form -->
+            <div id="login-form" class="bg-white/10 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
+                <h1 class="text-4xl font-bold mb-2">Welcome Back!</h1>
+                <p class="text-gray-400 mb-8">Log in to manage your bills.</p>
+                <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="login-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Login</button>
+                <div class="my-4 flex items-center">
+                    <hr class="flex-grow border-gray-600"><span class="mx-2 text-gray-400">OR</span><hr class="flex-grow border-gray-600">
+                </div>
+                <button id="google-login-btn" class="w-full bg-white hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+                <p class="text-gray-400 mt-6">Don't have an account? <button id="show-signup-btn" class="font-semibold text-blue-400 hover:text-blue-300">Sign Up</button></p>
+            </div>
+            <!-- Signup Form -->
+            <div id="signup-form" class="hidden bg-white/10 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
+                <h1 class="text-4xl font-bold mb-2">Create Account</h1>
+                <p class="text-gray-400 mb-8">Start tracking your expenses with SparkBill.</p>
+                <input type="text" id="signup-name" placeholder="Full Name" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-700 text-white placeholder-gray-400 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="signup-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Create Account</button>
+                <p class="text-gray-400 mt-6">Already have an account? <button id="show-login-btn" class="font-semibold text-blue-400 hover:text-blue-300">Login</button></p>
+            </div>
         </div>
+    </main>
 
-        <a href="history.html" class="btn">View All Bills</a>
-        <a href="live.html" class="btn">View Live Bill</a>
-        <a href="complaint.html" class="btn">Submit a Complaint</a>
-    </div>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 SparkBill</p>
-        <div class="social-icons">
-            <a href="mailto: naitikkumarmeps@gmail.com">📧</a>
-            <a href="tel: 8979133549">📞</a>
-            <a href="https://www.linkedin.com/in/naitikkumar/">🔗</a>
-        </div>
-    </footer>
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sparkbill-default';
 
-    <script>
-        function showForm() {
-            document.getElementById('billForm').style.display = 'block';
-        }
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = './dashboard.html';
+            }
+        });
 
-        function generateBill() {
-            const name = document.getElementById('name').value;
-            const accountNumber = document.getElementById('accountNumber').value;
-            const readingFrom = parseInt(document.getElementById('readingFrom').value);
-            const readingTo = parseInt(document.getElementById('readingTo').value);
+        // --- UI Toggling ---
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        document.getElementById('show-signup-btn').addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+        });
+        document.getElementById('show-login-btn').addEventListener('click', () => {
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
 
-            if (!name || !accountNumber || isNaN(readingFrom) || isNaN(readingTo) || readingTo <= readingFrom) {
-                alert('Please fill out all fields correctly.');
+        // --- Email/Pass Signup ---
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            if (!name || !email || !password) {
+                alert("Please fill in all fields.");
                 return;
             }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
+                await setDoc(userDocRef, { name: name, email: email });
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
 
-            const units = readingTo - readingFrom;
-            const totalCost = units * 5; // Assuming a fixed rate per unit.
+        // --- Email/Pass Login ---
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) {
+                alert("Please enter email and password.");
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
 
-            const billData = { name, accountNumber, units, totalCost, date: new Date().toLocaleDateString() };
+        // --- Google Login ---
+        document.getElementById('google-login-btn').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
+                await setDoc(userDocRef, { name: user.displayName, email: user.email }, { merge: true });
+            } catch (error) {
+                alert(`Error with Google Sign-In: ${error.message}`);
+            }
+        });
 
-            // Retrieve old bills, add the new bill, and save to localStorage
-            let allBills = JSON.parse(localStorage.getItem('allBills')) || [];
-            allBills = allBills.filter(bill => bill.accountNumber !== accountNumber); // Remove old bills for this account
-            allBills.push(billData);
-            localStorage.setItem('allBills', JSON.stringify(allBills));
-
-            localStorage.setItem('billData', JSON.stringify(billData)); // Save the most recent bill
-            alert('Bill generated successfully!');
-            window.location.href = 'bill.html';
-        }
+        // --- Background Animation ---
+        particlesJS('particles-js', { particles: { number: { value: 60 }, color: { value: "#ffffff" }, shape: { type: "circle" }, opacity: { value: 0.5, random: true }, size: { value: 3, random: true }, line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4 }, move: { enable: true, speed: 2, direction: "none", out_mode: "out" } }, interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "repulse" } } } });
     </script>
 </body>
 </html>
