@@ -96,9 +96,11 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // This event listener ensures that the entire HTML document is loaded and ready before the script runs.
-        // This prevents errors where the script tries to find an element that doesn't exist yet.
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- App Initialization Function ---
+        function initializeDashboard() {
+            // --- App State & Constants ---
+            let currentUser = null;
+            let spendingChart = null;
             const firebaseConfig = {
                 apiKey: "AIzaSyDtp76ZBi1bgq6Kd5YmSLy6g6epz9akqbo",
                 authDomain: "sparkbill-3acd9.firebaseapp.com",
@@ -107,32 +109,19 @@
                 messagingSenderId: "229628431102",
                 appId: "1:229628431102:web:d7a8c9b0e1f2a3b4c5d6e7"
             };
+            const appId = "sparkbill-3acd9";
 
+            // --- Firebase Initialization ---
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = "sparkbill-3acd9";
-            let currentUser = null;
-            let spendingChart = null;
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUser = user;
-                    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
-                    const docSnap = await getDoc(userDocRef);
-                    if (docSnap.exists()) {
-                        document.getElementById('welcome-message').textContent = `Welcome, ${docSnap.data().name || 'Guest'}!`;
-                    } else if (user.isAnonymous) {
-                         document.getElementById('welcome-message').textContent = `Welcome, Guest!`;
-                    }
-                    fetchSpendingData();
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
+            // --- DOM Elements ---
+            const modal = document.getElementById('bill-modal');
+            const formFieldsContainer = document.getElementById('form-fields');
+            const billTypeSelect = document.getElementById('bill-type');
 
-            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-
+            // --- Functions ---
             async function fetchSpendingData() {
                 if (!currentUser) return;
                 const now = new Date();
@@ -177,17 +166,6 @@
                 });
             }
 
-            const modal = document.getElementById('bill-modal');
-            const formFieldsContainer = document.getElementById('form-fields');
-            const billTypeSelect = document.getElementById('bill-type');
-
-            document.getElementById('add-bill-btn').addEventListener('click', () => {
-                updateFormFields();
-                modal.classList.remove('hidden');
-            });
-            document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
-            billTypeSelect.addEventListener('change', updateFormFields);
-
             function updateFormFields() {
                 const type = billTypeSelect.value;
                 let html = `<input type="text" id="bill-name" placeholder="Bill For (e.g., Home, Car)" class="w-full bg-gray-700 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">`;
@@ -201,10 +179,12 @@
                 formFieldsContainer.innerHTML = html;
             }
 
-            document.getElementById('save-bill-btn').addEventListener('click', async () => {
-                if (!currentUser) return;
+            async function saveBill() {
+                if (!currentUser) { alert("You are not logged in. Please refresh."); return; }
                 const type = billTypeSelect.value;
-                const name = document.getElementById('bill-name').value.trim();
+                const nameInput = document.getElementById('bill-name');
+                if (!nameInput) { console.error("Could not find bill name input"); return; }
+                const name = nameInput.value.trim();
                 if (!name) { alert('Please enter a name for the bill.'); return; }
 
                 let billData = { type, name, date: new Date().toISOString(), userId: currentUser.uid, totalCost: 0 };
@@ -213,9 +193,8 @@
                     if (type === 'electricity') {
                         const from = parseFloat(document.getElementById('reading-from').value), to = parseFloat(document.getElementById('reading-to').value);
                         if (isNaN(from) || isNaN(to) || to <= from) { alert('Invalid electricity readings.'); return; }
-                        const units = to - from;
-                        billData.units = units;
-                        billData.totalCost = units * 7.50;
+                        billData.units = to - from;
+                        billData.totalCost = billData.units * 7.50;
                     } else if (type === 'fuel') {
                         const litres = parseFloat(document.getElementById('fuel-litres').value), price = parseFloat(document.getElementById('fuel-price').value);
                         if (isNaN(litres) || isNaN(price) || litres <= 0 || price <= 0) { alert('Invalid fuel details.'); return; }
@@ -236,13 +215,43 @@
                     fetchSpendingData();
                 } catch (error) {
                     console.error("Error saving bill: ", error);
-                    alert('Failed to save bill.');
+                    alert('Failed to save bill. Check console for details.');
+                }
+            }
+
+            // --- Event Listeners & Auth State Observer ---
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
+                    const docSnap = await getDoc(userDocRef);
+                    if (docSnap.exists()) {
+                        document.getElementById('welcome-message').textContent = `Welcome, ${docSnap.data().name || 'Guest'}!`;
+                    } else if (user.isAnonymous) {
+                         document.getElementById('welcome-message').textContent = `Welcome, Guest!`;
+                    }
+                    fetchSpendingData();
+                } else {
+                    window.location.href = 'index.html';
                 }
             });
-            
-            // Initial call to set up the form fields when the page loads
+
+            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('add-bill-btn').addEventListener('click', () => {
+                updateFormFields();
+                modal.classList.remove('hidden');
+            });
+            document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
+            billTypeSelect.addEventListener('change', updateFormFields);
+            document.getElementById('save-bill-btn').addEventListener('click', saveBill);
+
+            // Initial call to set up the form fields
             updateFormFields();
-        });
+        }
+
+        // --- Entry Point ---
+        // This event listener ensures that the entire HTML document is loaded and ready before the script runs.
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
 </body>
 </html>
