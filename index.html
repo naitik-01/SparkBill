@@ -29,61 +29,88 @@
             <p class="text-blue-200">Your Personal Expense Tracker</p>
         </div>
         <div id="auth-container" class="max-w-md w-full">
-            <!-- Login Form -->
-            <div id="login-form" class="bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
-                <h2 class="text-3xl font-bold mb-6">Login</h2>
-                <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <button id="login-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Login</button>
-                <div class="my-4 flex items-center">
-                    <hr class="flex-grow border-blue-400/50"><span class="mx-2 text-gray-300 text-sm">OR</span><hr class="flex-grow border-blue-400/50">
-                </div>
-                <button id="google-login-btn" class="w-full bg-white hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
-                    <i class="fab fa-google"></i> Sign in with Google
-                </button>
-                <p class="text-gray-300 mt-6">Don't have an account? <button id="show-signup-btn" class="font-semibold text-blue-300 hover:text-blue-200">Sign Up</button></p>
-            </div>
-            <!-- Signup Form -->
-            <div id="signup-form" class="hidden bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
-                <h2 class="text-3xl font-bold mb-6">Create Account</h2>
-                <input type="text" id="signup-name" placeholder="Full Name" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <button id="signup-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Create Account</button>
-                <p class="text-gray-300 mt-6">Already have an account? <button id="show-login-btn" class="font-semibold text-blue-300 hover:text-blue-200">Login</button></p>
-            </div>
+            <!-- This container will be populated by JavaScript -->
         </div>
     </main>
+
+    <!-- Template for Login Form -->
+    <template id="login-template">
+        <div class="bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
+            <h2 class="text-3xl font-bold mb-6">Login</h2>
+            <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <button id="login-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Login</button>
+            <div class="my-4 flex items-center">
+                <hr class="flex-grow border-blue-400/50"><span class="mx-2 text-gray-300 text-sm">OR</span><hr class="flex-grow border-blue-400/50">
+            </div>
+            <button id="google-login-btn" class="w-full bg-white hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2">
+                <i class="fab fa-google"></i> Sign in with Google
+            </button>
+            <p class="text-gray-300 mt-6">Don't have an account? <button id="show-signup-btn" class="font-semibold text-blue-300 hover:text-blue-200">Sign Up</button></p>
+        </div>
+    </template>
+
+    <!-- Template for Signup Form -->
+    <template id="signup-template">
+        <div class="bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-lg text-center transition-opacity duration-500">
+            <h2 class="text-3xl font-bold mb-6">Create Account</h2>
+            <input type="text" id="signup-name" placeholder="Full Name" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-900/50 text-white placeholder-gray-300 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <button id="signup-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mb-4">Create Account</button>
+            <p class="text-gray-300 mt-6">Already have an account? <button id="show-login-btn" class="font-semibold text-blue-300 hover:text-blue-200">Login</button></p>
+        </div>
+    </template>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const authContainer = document.getElementById('auth-container');
+        
+        // --- 1. Firebase Configuration ---
+        // This is now hardcoded with your project details.
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtp76ZBi1bgq6Kd5YmSLy6g6epz9akqbo",
+            authDomain: "sparkbill-3acd9.firebaseapp.com",
+            projectId: "sparkbill-3acd9",
+            storageBucket: "sparkbill-3acd9.appspot.com",
+            messagingSenderId: "229628431102",
+            appId: "1:229628431102:web:d7a8c9b0e1f2a3b4c5d6e7" // Example App ID
+        };
+
+        // --- 2. Initialize Firebase and Set Up UI ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sparkbill-default';
+        const appId = "sparkbill-3acd9"; // Using your project ID
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = './dashboard.html';
-            }
-        });
+        function showLoginForm() {
+            authContainer.innerHTML = ''; // Clear container
+            const template = document.getElementById('login-template');
+            const form = template.content.cloneNode(true);
+            authContainer.appendChild(form);
+            
+            // Re-attach event listeners
+            document.getElementById('show-signup-btn').addEventListener('click', showSignupForm);
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('google-login-btn').addEventListener('click', handleGoogleLogin);
+        }
 
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
-        document.getElementById('show-signup-btn').addEventListener('click', () => {
-            loginForm.classList.add('hidden');
-            signupForm.classList.remove('hidden');
-        });
-        document.getElementById('show-login-btn').addEventListener('click', () => {
-            signupForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-        });
+        function showSignupForm() {
+            authContainer.innerHTML = ''; // Clear container
+            const template = document.getElementById('signup-template');
+            const form = template.content.cloneNode(true);
+            authContainer.appendChild(form);
 
-        document.getElementById('signup-btn').addEventListener('click', async () => {
+            // Re-attach event listeners
+            document.getElementById('show-login-btn').addEventListener('click', showLoginForm);
+            document.getElementById('signup-btn').addEventListener('click', handleSignup);
+        }
+
+        // --- 3. Authentication Logic Handlers ---
+        async function handleSignup() {
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
@@ -96,12 +123,13 @@
                 const user = userCredential.user;
                 const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
                 await setDoc(userDocRef, { name: name, email: email });
+                // onAuthStateChanged will handle redirect
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                alert(`Sign-up Error: ${error.message}`);
             }
-        });
+        }
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
+        async function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
             if (!email || !password) {
@@ -110,20 +138,34 @@
             }
             try {
                 await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle redirect
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                alert(`Login Error: ${error.message}`);
             }
-        });
+        }
 
-        document.getElementById('google-login-btn').addEventListener('click', async () => {
+        async function handleGoogleLogin() {
             const provider = new GoogleAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
+                // Use { merge: true } to avoid overwriting existing data if user signs up differently
                 await setDoc(userDocRef, { name: user.displayName, email: user.email }, { merge: true });
+                // onAuthStateChanged will handle redirect
             } catch (error) {
-                alert(`Error with Google Sign-In: ${error.message}`);
+                alert(`Google Sign-In Error: ${error.message}`);
+            }
+        }
+
+        // --- 4. Auth State Observer ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // If user is logged in, redirect to the dashboard
+                window.location.href = './dashboard.html';
+            } else {
+                // If user is logged out, show the login form
+                showLoginForm();
             }
         });
     </script>
