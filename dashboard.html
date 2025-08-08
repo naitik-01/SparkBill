@@ -96,162 +96,176 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- App Initialization Function ---
-        function initializeDashboard() {
-            // --- App State & Constants ---
-            let currentUser = null;
-            let spendingChart = null;
-            const firebaseConfig = {
-                apiKey: "AIzaSyDtp76ZBi1bgq6Kd5YmSLy6g6epz9akqbo",
-                authDomain: "sparkbill-3acd9.firebaseapp.com",
-                projectId: "sparkbill-3acd9",
-                storageBucket: "sparkbill-3acd9.appspot.com",
-                messagingSenderId: "229628431102",
-                appId: "1:229628431102:web:d7a8c9b0e1f2a3b4c5d6e7"
-            };
-            const appId = "sparkbill-3acd9";
+        console.log("SparkBill Dashboard Script: Started.");
 
-            // --- Firebase Initialization ---
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
+        // --- 1. Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtp76ZBi1bgq6Kd5YmSLy6g6epz9akqbo",
+            authDomain: "sparkbill-3acd9.firebaseapp.com",
+            projectId: "sparkbill-3acd9",
+            storageBucket: "sparkbill-3acd9.appspot.com",
+            messagingSenderId: "229628431102",
+            appId: "1:229628431102:web:d7a8c9b0e1f2a3b4c5d6e7"
+        };
+        const appId = "sparkbill-3acd9";
 
-            // --- DOM Elements ---
-            const modal = document.getElementById('bill-modal');
-            const formFieldsContainer = document.getElementById('form-fields');
-            const billTypeSelect = document.getElementById('bill-type');
-
-            // --- Functions ---
-            async function fetchSpendingData() {
-                if (!currentUser) return;
-                const now = new Date();
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-                
-                const billsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/bills`);
-                const q = query(billsRef, where("date", ">=", startOfMonth));
-                const querySnapshot = await getDocs(q);
-
-                const spending = { electricity: 0, fuel: 0, other: 0 };
-                querySnapshot.forEach(doc => {
-                    const bill = doc.data();
-                    if (spending.hasOwnProperty(bill.type)) {
-                        spending[bill.type] += bill.totalCost;
-                    }
-                });
-                renderSpendingChart(spending);
-            }
-
-            function renderSpendingChart(data) {
-                const ctx = document.getElementById('spendingChart').getContext('2d');
-                if(spendingChart) spendingChart.destroy();
-                spendingChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Electricity', 'Fuel', 'Other'],
-                        datasets: [{
-                            label: 'Spending (₹)',
-                            data: [data.electricity, data.fuel, data.other],
-                            backgroundColor: ['#3b82f6', '#10b981', '#f97316'],
-                            borderRadius: 8,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#4b5563' } },
-                            x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
-                        }
-                    }
-                });
-            }
-
-            function updateFormFields() {
-                const type = billTypeSelect.value;
-                let html = `<input type="text" id="bill-name" placeholder="Bill For (e.g., Home, Car)" class="w-full bg-gray-700 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">`;
-                if (type === 'electricity') {
-                    html += `<input type="number" id="reading-from" placeholder="Previous Reading (Units)" class="w-full bg-gray-700 p-3 rounded-lg mb-4"><input type="number" id="reading-to" placeholder="Current Reading (Units)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">`;
-                } else if (type === 'fuel') {
-                    html += `<input type="number" id="fuel-litres" placeholder="Litres" class="w-full bg-gray-700 p-3 rounded-lg mb-4"><input type="number" id="fuel-price" placeholder="Price per Litre (₹)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">`;
-                } else {
-                    html += `<input type="number" id="other-amount" placeholder="Total Amount (₹)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">`;
-                }
-                formFieldsContainer.innerHTML = html;
-            }
-
-            async function saveBill() {
-                if (!currentUser) { alert("You are not logged in. Please refresh."); return; }
-                const type = billTypeSelect.value;
-                const nameInput = document.getElementById('bill-name');
-                if (!nameInput) { console.error("Could not find bill name input"); return; }
-                const name = nameInput.value.trim();
-                if (!name) { alert('Please enter a name for the bill.'); return; }
-
-                let billData = { type, name, date: new Date().toISOString(), userId: currentUser.uid, totalCost: 0 };
-
-                try {
-                    if (type === 'electricity') {
-                        const from = parseFloat(document.getElementById('reading-from').value), to = parseFloat(document.getElementById('reading-to').value);
-                        if (isNaN(from) || isNaN(to) || to <= from) { alert('Invalid electricity readings.'); return; }
-                        billData.units = to - from;
-                        billData.totalCost = billData.units * 7.50;
-                    } else if (type === 'fuel') {
-                        const litres = parseFloat(document.getElementById('fuel-litres').value), price = parseFloat(document.getElementById('fuel-price').value);
-                        if (isNaN(litres) || isNaN(price) || litres <= 0 || price <= 0) { alert('Invalid fuel details.'); return; }
-                        billData.litres = litres;
-                        billData.pricePerLitre = price;
-                        billData.totalCost = litres * price;
-                    } else {
-                        const amount = parseFloat(document.getElementById('other-amount').value);
-                        if (isNaN(amount) || amount <= 0) { alert('Invalid amount.'); return; }
-                        billData.totalCost = amount;
-                    }
-
-                    const billsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/bills`);
-                    await addDoc(billsRef, billData);
-                    
-                    alert('Bill saved successfully!');
-                    modal.classList.add('hidden');
-                    fetchSpendingData();
-                } catch (error) {
-                    console.error("Error saving bill: ", error);
-                    alert('Failed to save bill. Check console for details.');
-                }
-            }
-
-            // --- Event Listeners & Auth State Observer ---
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUser = user;
-                    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
-                    const docSnap = await getDoc(userDocRef);
-                    if (docSnap.exists()) {
-                        document.getElementById('welcome-message').textContent = `Welcome, ${docSnap.data().name || 'Guest'}!`;
-                    } else if (user.isAnonymous) {
-                         document.getElementById('welcome-message').textContent = `Welcome, Guest!`;
-                    }
-                    fetchSpendingData();
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
-
-            document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-            document.getElementById('add-bill-btn').addEventListener('click', () => {
-                updateFormFields();
-                modal.classList.remove('hidden');
-            });
-            document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
-            billTypeSelect.addEventListener('change', updateFormFields);
-            document.getElementById('save-bill-btn').addEventListener('click', saveBill);
-
-            // Initial call to set up the form fields
-            updateFormFields();
+        // --- 2. Initialize Firebase ---
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("SparkBill Dashboard Script: Firebase Initialized Successfully.");
+        } catch (error) {
+            console.error("SparkBill Dashboard Script: FATAL ERROR - Firebase initialization failed.", error);
+            alert("Could not initialize the application. Please check the console for errors.");
+            throw new Error("Firebase init failed");
         }
 
-        // --- Entry Point ---
-        // This event listener ensures that the entire HTML document is loaded and ready before the script runs.
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        // --- 3. Main Application Logic (runs after DOM is loaded) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("SparkBill Dashboard Script: DOMContentLoaded event fired.");
+
+            try {
+                // --- App State ---
+                let currentUser = null;
+                let spendingChart = null;
+
+                // --- DOM Elements ---
+                const modal = document.getElementById('bill-modal');
+                const formFieldsContainer = document.getElementById('form-fields');
+                const billTypeSelect = document.getElementById('bill-type');
+                const welcomeMessage = document.getElementById('welcome-message');
+                const logoutBtn = document.getElementById('logout-btn');
+                const addBillBtn = document.getElementById('add-bill-btn');
+                const closeModalBtn = document.getElementById('close-modal-btn');
+                const saveBillBtn = document.getElementById('save-bill-btn');
+
+                // --- Functions (declarations) ---
+                async function fetchSpendingData() {
+                    if (!currentUser) return;
+                    const now = new Date();
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                    const billsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/bills`);
+                    const q = query(billsRef, where("date", ">=", startOfMonth));
+                    const querySnapshot = await getDocs(q);
+                    const spending = { electricity: 0, fuel: 0, other: 0 };
+                    querySnapshot.forEach(doc => {
+                        const bill = doc.data();
+                        if (spending.hasOwnProperty(bill.type)) {
+                            spending[bill.type] += bill.totalCost;
+                        }
+                    });
+                    renderSpendingChart(spending);
+                }
+
+                function renderSpendingChart(data) {
+                    const ctx = document.getElementById('spendingChart').getContext('2d');
+                    if(spendingChart) spendingChart.destroy();
+                    spendingChart = new Chart(ctx, {
+                        type: 'bar', data: {
+                            labels: ['Electricity', 'Fuel', 'Other'],
+                            datasets: [{
+                                label: 'Spending (₹)', data: [data.electricity, data.fuel, data.other],
+                                backgroundColor: ['#3b82f6', '#10b981', '#f97316'], borderRadius: 8,
+                            }]
+                        },
+                        options: {
+                            responsive: true, plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#4b5563' } },
+                                x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                            }
+                        }
+                    });
+                }
+
+                function updateFormFields() {
+                    const type = billTypeSelect.value;
+                    let html = `<input type="text" id="bill-name" placeholder="Bill For (e.g., Home, Car)" class="w-full bg-gray-700 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">`;
+                    if (type === 'electricity') {
+                        html += `<input type="number" id="reading-from" placeholder="Previous Reading (Units)" class="w-full bg-gray-700 p-3 rounded-lg mb-4"><input type="number" id="reading-to" placeholder="Current Reading (Units)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">`;
+                    } else if (type === 'fuel') {
+                        html += `<input type="number" id="fuel-litres" placeholder="Litres" class="w-full bg-gray-700 p-3 rounded-lg mb-4"><input type="number" id="fuel-price" placeholder="Price per Litre (₹)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">`;
+                    } else {
+                        html += `<input type="number" id="other-amount" placeholder="Total Amount (₹)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">`;
+                    }
+                    formFieldsContainer.innerHTML = html;
+                }
+
+                async function saveBill() {
+                    if (!currentUser) { alert("You are not logged in. Please refresh."); return; }
+                    const type = billTypeSelect.value;
+                    const nameInput = document.getElementById('bill-name');
+                    if (!nameInput) { console.error("Could not find bill name input"); return; }
+                    const name = nameInput.value.trim();
+                    if (!name) { alert('Please enter a name for the bill.'); return; }
+
+                    let billData = { type, name, date: new Date().toISOString(), userId: currentUser.uid, totalCost: 0 };
+
+                    try {
+                        if (type === 'electricity') {
+                            const from = parseFloat(document.getElementById('reading-from').value), to = parseFloat(document.getElementById('reading-to').value);
+                            if (isNaN(from) || isNaN(to) || to <= from) { alert('Invalid electricity readings.'); return; }
+                            billData.units = to - from;
+                            billData.totalCost = billData.units * 7.50;
+                        } else if (type === 'fuel') {
+                            const litres = parseFloat(document.getElementById('fuel-litres').value), price = parseFloat(document.getElementById('fuel-price').value);
+                            if (isNaN(litres) || isNaN(price) || litres <= 0 || price <= 0) { alert('Invalid fuel details.'); return; }
+                            billData.litres = litres;
+                            billData.pricePerLitre = price;
+                            billData.totalCost = litres * price;
+                        } else {
+                            const amount = parseFloat(document.getElementById('other-amount').value);
+                            if (isNaN(amount) || amount <= 0) { alert('Invalid amount.'); return; }
+                            billData.totalCost = amount;
+                        }
+                        const billsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/bills`);
+                        await addDoc(billsRef, billData);
+                        alert('Bill saved successfully!');
+                        modal.classList.add('hidden');
+                        fetchSpendingData();
+                    } catch (error) {
+                        console.error("Error saving bill: ", error);
+                        alert('Failed to save bill. Check console for details.');
+                    }
+                }
+
+                // --- Event Listeners & Auth Observer ---
+                console.log("SparkBill Dashboard Script: Attaching event listeners...");
+                logoutBtn.addEventListener('click', () => signOut(auth));
+                addBillBtn.addEventListener('click', () => {
+                    console.log("Add New Bill button clicked.");
+                    updateFormFields();
+                    modal.classList.remove('hidden');
+                });
+                closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+                billTypeSelect.addEventListener('change', updateFormFields);
+                saveBillBtn.addEventListener('click', saveBill);
+                console.log("SparkBill Dashboard Script: Event listeners attached.");
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUser = user;
+                        const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
+                        const docSnap = await getDoc(userDocRef);
+                        if (docSnap.exists()) {
+                            welcomeMessage.textContent = `Welcome, ${docSnap.data().name || 'Guest'}!`;
+                        } else if (user.isAnonymous) {
+                            welcomeMessage.textContent = `Welcome, Guest!`;
+                        }
+                        fetchSpendingData();
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                });
+                updateFormFields();
+
+            } catch (error) {
+                console.error("An error occurred during dashboard initialization:", error);
+                alert("A critical error occurred. Please check the console and refresh the page.");
+            }
+        });
     </script>
 </body>
 </html>
