@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SparkBill - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-white no-scrollbar">
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 id="welcome-message" class="text-2xl md:text-3xl font-bold">Welcome!</h1>
+                <p class="text-gray-400">Here's your expense overview for the month.</p>
+            </div>
+            <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Logout</button>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Spending Chart & Live Rates -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Spending Chart -->
+                <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-xl font-bold mb-4">This Month's Spending</h2>
+                    <canvas id="spendingChart"></canvas>
+                </div>
+                <!-- Live Rates -->
+                <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-xl font-bold mb-4">Live Fuel & Energy Rates (Indicative)</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Petrol</p>
+                            <p class="text-2xl font-bold">₹103.50/L</p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Diesel</p>
+                            <p class="text-2xl font-bold">₹90.03/L</p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Electricity</p>
+                            <p class="text-2xl font-bold">~₹7.50/unit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-xl font-bold mb-6">Actions</h2>
+                <div class="space-y-4">
+                    <button id="add-bill-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">Add New Bill</button>
+                    <a href="./history.html" class="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300">View Bill History</a>
+                    <a href="./complaint.html" class="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300">Submit a Complaint</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding a Bill -->
+    <div id="bill-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">Add a New Bill</h2>
+            <div class="mb-4">
+                <label for="bill-type" class="block text-sm font-medium text-gray-400 mb-2">Bill Type</label>
+                <select id="bill-type" class="w-full bg-gray-700 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="electricity">Electricity</option>
+                    <option value="fuel">Fuel (Petrol/Diesel)</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <!-- Form Fields Container -->
+            <div id="form-fields"></div>
+
+            <div class="flex gap-4 mt-6">
+                <button id="save-bill-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">Save Bill</button>
+                <button id="close-modal-btn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sparkbill-default';
+        let currentUser = null;
+        let spendingChart = null;
+
+        // --- Auth State ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile`, "details");
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    document.getElementById('welcome-message').textContent = `Welcome, ${docSnap.data().name}!`;
+                }
+                fetchSpendingData();
+            } else {
+                window.location.href = './index.html';
+            }
+        });
+
+        // --- Logout ---
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+        // --- Chart Logic ---
+        async function fetchSpendingData() {
+            if (!currentUser) return;
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+            
+            const billsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/bills`);
+            const q = query(billsRef, where("date", ">=", startOfMonth));
+            const querySnapshot = await getDocs(q);
+
+            const spending = { electricity: 0, fuel: 0, other: 0 };
+            querySnapshot.forEach(doc => {
+                const bill = doc.data();
+                if (spending.hasOwnProperty(bill.type)) {
+                    spending[bill.type] += bill.totalCost;
+                }
+            });
+            renderSpendingChart(spending);
+        }
+
+        function renderSpendingChart(data) {
+            const ctx = document.getElementById('spendingChart').getContext('2d');
+            if(spendingChart) {
+                spendingChart.destroy();
+            }
+            spendingChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Electricity', 'Fuel', 'Other'],
+                    datasets: [{
+                        label: 'Spending (₹)',
+                        data: [data.electricity, data.fuel, data.other],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f97316'],
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#374151' } },
+                        x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Modal & Form Logic ---
+        const modal = document.getElementById('bill-modal');
+        const formFieldsContainer = document.getElementById('form-fields');
+        const billTypeSelect = document.getElementById('bill-type');
+
+        document.getElementById('add-bill-btn').addEventListener('click', () => {
+            updateFormFields();
+            modal.classList.remove('hidden');
+        });
+        document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
+        billTypeSelect.addEventListener('change', updateFormFields);
+
+        function updateFormFields() {
+            const type = billTypeSelect.value;
+            let html = `
+                <input type="text" id="bill-name" placeholder="Bill For (e.g., Home, Car)" class="w-full bg-gray-700 p-3 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            `;
+            if (type === 'electricity') {
+                html += `
+                    <input type="number" id="reading-from" placeholder="Previous Reading (Units)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">
+                    <input type="number" id="reading-to" placeholder="Current Reading (Units)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">
+                `;
+            } else if (type === 'fuel') {
+                html += `
+                    <input type="number" id="fuel-litres" placeholder="Litres" class="w-full bg-gray-700 p-3 rounded-lg mb-4">
+                    <input type="number" id="fuel-price" placeholder="Price per Litre (₹)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">
+                `;
+            } else { // other
+                html += `
+                    <input type="number" id="other-amount" placeholder="Total Amount (₹)" class="w-full bg-gray-700 p-3 rounded-lg mb-4">
+                `;
+            }
+            formFieldsContainer.innerHTML = html;
+        }
+
+        // --- Save Bill ---
+        document.getElementById('save-bill-btn').addEventListener('click', async () => {
+            if (!currentUser) return;
+            const type = billTypeSelect.value;
+            const name = document.getElementById('bill-name').value.trim();
+            if (!name) {
+                alert('Please enter a name for the bill.');
+                return;
+            }
+
+            let billData = {
+                type: type,
+                name: name,
+                date: new Date().toISOString(),
+                userId: currentUser.uid,
+                totalCost: 0,
+            };
+
+            try {
+                if (type === 'electricity') {
+                    const from = parseFloat(document.getElementById('reading-from').value);
+                    const to = parseFloat(document.getElementById('reading-to').value);
+                    if (isNaN(from) || isNaN(to) || to <= from) {
+                        alert('Invalid electricity readings.'); return;
+                    }
+                    const units = to - from;
+                    billData.units = units;
+                    billData.totalCost = units * 7.50; // Indicative rate
+                } else if (type === 'fuel') {
+                    const litres = parseFloat(document.getElementById('fuel-litres').value);
+                    const price = parseFloat(document.getElementById('fuel-price').value);
+                    if (isNaN(litres) || isNaN(price) || litres <= 0 || price <= 0) {
+                        alert('Invalid fuel details.'); return;
+                    }
+                    billData.litres = litres;
+                    billData.pricePerLitre = price;
+                    billData.totalCost = litres * price;
+                } else {
+                    const amount = parseFloat(document.getElementById('other-amount').value);
+                    if (isNaN(amount) || amount <= 0) {
+                        alert('Invalid amount.'); return;
+                    }
+                    billData.totalCost = amount;
+                }
+
+                const billsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/bills`);
+                await addDoc(billsRef, billData);
+                
+                alert('Bill saved successfully!');
+                modal.classList.add('hidden');
+                fetchSpendingData(); // Refresh chart
+            } catch (error) {
+                console.error("Error saving bill: ", error);
+                alert('Failed to save bill.');
+            }
+        });
+    </script>
+</body>
+</html>
